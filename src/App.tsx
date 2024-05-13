@@ -1,24 +1,55 @@
-import Hero from "./components/Hero";
-import HomeCard from "./components/HomeCard";
-import JobListing from "./components/JobListings";
-import NavBar from "./components/NavBar";
-import ViewAllJobs from "./components/ViewAllJobs";
+import HomePage from "./pages/HomePage";
+import Layout from "./layouts/MainLayout";
 
-const heading = {
-  title: "Become a React Dev",
-  subtitle: "Find the React job that fits your skill set",
-};
+import {
+  Route,
+  createBrowserRouter,
+  createRoutesFromElements,
+  RouterProvider,
+} from "react-router-dom";
+import JobsPage from "./pages/JobsPage";
+import NotFound from "./pages/NotFound";
+import JobPage, { jobLoader } from "./pages/JobPage";
+import AddJob from "./pages/AddJobPage";
 
 const App = () => {
-  return (
-    <>
-      <NavBar />
-      <Hero title={heading.title} subtitle={heading.subtitle} />
-      <HomeCard />
-      <JobListing />
-      <ViewAllJobs />
-    </>
+  const addJob = async (newJob: any) => {
+    const resp = await fetch("/api/jobs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newJob),
+    });
+
+    return;
+  };
+
+  const deleteJob = async (id: any) => {
+    const resp = await fetch(`/api/jobs/${id}`, {
+      method: "DELETE",
+    });
+
+    return;
+  };
+
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route path="/" element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route path="/jobs" element={<JobsPage />} />
+        <Route path="/add-job" element={<AddJob AddJobSubmit={addJob} />} />
+        <Route
+          path="/job/:id"
+          element={<JobPage deleteJob={deleteJob} />}
+          loader={jobLoader}
+        />
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    )
   );
+
+  return <RouterProvider router={router} />;
 };
 
 export default App;
